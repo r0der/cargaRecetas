@@ -1,4 +1,6 @@
-export default async function handler(req,res){
+export default async function handler(req, res) {
+
+try {
 
 const response = await fetch(
 `https://api.notion.com/v1/databases/${process.env.RECETAS_DB}`,
@@ -12,12 +14,23 @@ headers:{
 
 const data = await response.json()
 
-const vendedores = data.properties.Vendedor.multi_select.options.map(o=>o.name)
-const productos = data.properties.Producto.multi_select.options.map(o=>o.name)
+const vendedores =
+data.properties["AIC Lectura"]?.multi_select?.options?.map(o=>o.name) || []
+
+const productos =
+data.properties["Productos"]?.multi_select?.options?.map(o=>o.name) || []
 
 res.status(200).json({
 vendedores,
 productos
 })
+
+} catch(error){
+
+res.status(500).json({
+error:error.message
+})
+
+}
 
 }
