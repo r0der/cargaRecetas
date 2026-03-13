@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+<meta charset="UTF-8">
+<title>Carga de Recetas</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f3f6fb;
+padding:40px;
+}
+
+.container{
+background:white;
+padding:30px;
+width:650px;
+margin:auto;
+border-radius:10px;
+box-shadow:0 5px 20px rgba(0,0,0,0.1);
+}
+
+h1{
+margin-bottom:25px;
+}
+
+label{
+display:block;
+margin-top:15px;
+font-weight:bold;
+}
+
+input, select{
+width:100%;
+padding:10px;
+margin-top:5px;
+font-size:16px;
+}
+
+button{
+margin-top:25px;
+padding:12px;
+font-size:16px;
+background:#2c7be5;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+
+button:hover{
+background:#1f5fc4;
+}
+
+.resultados{
+border:1px solid #ddd;
+background:white;
+max-height:150px;
+overflow-y:auto;
+}
+
+.resultado-item{
+padding:8px;
+cursor:pointer;
+}
+
+.resultado-item:hover{
+background:#eef3ff;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Carga de Recetas</h1>
+
+<label>AIC Lectura</label>
+<select id="vendedor" multiple></select>
+
+<label>Farmacia</label>
+<input type="text" id="buscarFarmacia">
+<div id="resultadosFarmacia" class="resultados"></div>
+
+<label>Médico (matrícula o nombre)</label>
+<input type="text" id="buscarMedico">
+<div id="resultadosMedico" class="resultados"></div>
+
+<label>Producto</label>
+<select id="producto" multiple></select>
+
+<label>Fecha receta (DDMMYY)</label>
+<input type="text" id="fechaReceta" maxlength="6" placeholder="DDMMYY">
+
+<button id="guardar">Guardar receta</button>
+
+</div>
+
+<script>
+
+let medicoSeleccionado = null
+let farmaciaSeleccionada = null
+
+
+
+async function cargarOpciones(){
+
+const res = await fetch("/api/opciones")
+const data = await res.json()
+
+const selVend = document.getElementById("vendedor")
+const selProd = document.getElementById("producto")
+
+data.vendedores.forEach(v=>{
+const opt=document.createElement("option")
+opt.value=v
+opt.textContent=v
+selVend.appendChild(opt)
+})
+
+data.productos.forEach(p=>{
+const opt=document.createElement("option")
+opt.value=p
+opt.textContent=p
+selProd.appendChild(opt)
+})
+
+}
+
+cargarOpciones()
+
+
+
+function convertirFecha(valor){
+
+if(valor.length !== 6) return null
+
+const dia = valor.substring(0,2)
+const mes = valor.substring(2,4)
+const anio = valor.substring(4,6)
+
+return `20${anio}-${mes}-${dia}`
+
+}
+
+
+
+function fechaValida(fechaISO){
+
+const fecha = new Date(fechaISO)
+const hoy = new Date()
+
+hoy.setHours(0,0,0,0)
+
+return fecha <= hoy
+
+}
+
+
+
+document.getElementById("buscarMedico").addEventListener("input", async e=>{
+
+const q = e.target.value
+
+if(q.length < 2) return
+
+const res = await fetch("/api/buscar-medico?q="+q)
+const data = await res.json()
+
+const cont=document.getElementById("resultadosMedico")
+cont.innerHTML=""
+
+data.forEach(m=>{
+
+const div=document.createElement("div")
+div.className="resultado-item"
+div.textContent=m.matricula+" - "+m.nombre
+
+div.onclick=()=>{
+medicoSeleccionado=m.id
+document.getElementById("buscarMedico").value=div.textContent
+cont.innerHTML=""
+}
+
+cont.appendChild(div)
+
+})
+
+})
+
+
+
+document.getElementById("buscarFarmacia").addEventListener("input", async e=>{
+
+const q = e.target.value
+
+if(q.length < 2) return
+
+const res = await fetch("/api/buscar-farmacia?q="+q)
+const data = await res.json()
+
+const cont=document.getElementById("resultadosFarmacia")
+cont.innerHTML=""
+
+data.forEach(f=>{
+
+const div=document.createElement("div")
+div.className="resultado-item"
+div.textContent=f.nombre
+
+div.onclick=()=>{
+farmaciaSeleccionada=f.id
+document.getElementById("buscarFarmacia").value=f.nombre
+cont.innerHTML=""
+}
+
+cont.appendChild(div)
+
+})
+
+})
+
+
+
+document.getElementById("guardar").addEventListener("click", async ()=>{
+
+if(!medicoSeleccionado){
+alert("Seleccione un médico")
+return
+}
+
+if(!farmaciaSeleccionada){
+alert("Seleccione una farmacia")
+return
+}
+
+const fechaInput=document.getElementById("fechaReceta").value
+
+const fechaISO=convertirFecha(fechaInput)
+
+if(!fechaISO){
+alert("Formato de fecha inválido (DDMMYY)")
+return
+}
+
+if(!fechaValida(fechaISO)){
+alert("La fecha de la receta no puede ser posterior a hoy")
+return
+}
+
+const vendedores=[...document.getElementById("vendedor").selectedOptions].map(o=>o.value)
+const productos=[...document.getElementById("producto").selectedOptions].map(o=>o.value)
+
+await fetch("/api/guardar-receta",{
+
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+medico:medicoSeleccionado,
+farmacia:farmaciaSeleccionada,
+vendedores:vendedores,
+productos:productos,
+fechaReceta:fechaISO
+
+})
+
+})
+
+alert("Receta guardada")
+
+limpiarFormulario()
+
+})
+
+
+
+function limpiarFormulario(){
+
+document.getElementById("buscarMedico").value=""
+document.getElementById("buscarFarmacia").value=""
+document.getElementById("fechaReceta").value=""
+
+medicoSeleccionado=null
+farmaciaSeleccionada=null
+
+document.getElementById("buscarMedico").focus()
+
+}
+
+
+
+document.addEventListener("keydown",function(e){
+
+if(e.key==="Enter"){
+
+const active=document.activeElement
+
+if(active.tagName==="INPUT"){
+e.preventDefault()
+active.nextElementSibling?.focus()
+}
+
+}
+
+})
+
+</script>
+
+</body>
+</html>
