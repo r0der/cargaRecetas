@@ -14,7 +14,7 @@ headers:{
 body:JSON.stringify({
 
 filter:{
-property:"Cliente",
+property:"Nombre",
 title:{contains:q}
 }
 
