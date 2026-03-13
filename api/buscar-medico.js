@@ -16,15 +16,15 @@ body:JSON.stringify({
 filter:{
 or:[
 {
-property:"Mat. MN",
+property:"Matricula Nacional",
 rich_text:{contains:q}
 },
 {
-property:"Mat. MP",
+property:"Matricula Provincial",
 rich_text:{contains:q}
 },
 {
-property:"Profesional",
+property:"Nombre",
 title:{contains:q}
 }
 ]
