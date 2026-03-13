@@ -3,7 +3,7 @@ export default async function handler(req,res){
 const q = req.query.q
 
 const response = await fetch(
-`https://api.notion.com/v1/databases/${process.env.MÉDICOS_DB}/query`,
+`https://api.notion.com/v1/databases/${process.env.MEDICOS_DB}/query`,
 {
 method:"POST",
 headers:{
