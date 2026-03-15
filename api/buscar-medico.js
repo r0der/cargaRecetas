@@ -17,11 +17,11 @@ filter:{
 or:[
 {
 property:"Mat. MN",
-number:{contains:q}
+number:{equals:Number(q)}
 },
 {
 property:"Mat. MP",
-number:{contains:q}
+number:{equals:Number(q)}
 },
 {
 property:"Profesional",
@@ -29,6 +29,7 @@ title:{contains:q}
 }
 ]
 }
+
 })
 })
 
@@ -39,8 +40,8 @@ const resultados = data.results.map(m=>({
 id:m.id,
 nombre:m.properties.Profesional.title[0]?.plain_text || "",
 matricula:
-m.properties["Mat. MN"].rich_text[0]?.plain_text ||
-m.properties["Mat. MP"].rich_text[0]?.plain_text ||
+m.properties["Mat. MN"].number ||
+m.properties["Mat. MP"].number ||
 ""
 
 }))
