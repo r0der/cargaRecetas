@@ -29,10 +29,6 @@ const resultados = data.results.map(m=>({
 
 id:m.id,
 nombre:m.properties.Profesional.title?.[0]?.plain_text || "",
-matricula:
-m.properties["Mat. MN"]?.number ||
-m.properties["Mat. MP"]?.number ||
-""
 
 }))
 
