@@ -14,21 +14,11 @@ headers:{
 body:JSON.stringify({
 
 filter:{
-or:[
-{
-property:"Mat. MN",
-number:{equals:Number(q)}
-},
-{
-property:"Mat. MP",
-number:{equals:Number(q)}
-},
-{
 property:"Profesional",
 title:{contains:q}
-}
-]
-}
+},
+
+page_size:20
 
 })
 })
@@ -38,11 +28,7 @@ const data = await response.json()
 const resultados = data.results.map(m=>({
 
 id:m.id,
-nombre:m.properties.Profesional.title?.[0]?.plain_text || "",
-matricula:
-m.properties["Mat. MN"].number ||
-m.properties["Mat. MP"].number ||
-""
+nombre:m.properties.Profesional.title?.[0]?.plain_text || ""
 
 }))
 
