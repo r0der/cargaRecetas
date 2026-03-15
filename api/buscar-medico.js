@@ -16,21 +16,19 @@ body:JSON.stringify({
 filter:{
 or:[
 {
-property:"Matricula Nacional",
-rich_text:{contains:q}
+property:"Mat. MN",
+number:{contains:q}
 },
 {
-property:"Matricula Provincial",
-rich_text:{contains:q}
+property:"Mat. MP",
+number:{contains:q}
 },
 {
-property:"Nombre",
+property:"Profesional",
 title:{contains:q}
 }
 ]
-
 }
-
 })
 })
 
@@ -39,10 +37,10 @@ const data = await response.json()
 const resultados = data.results.map(m=>({
 
 id:m.id,
-nombre:m.properties.Nombre.title[0]?.plain_text || "",
+nombre:m.properties.Profesional.title[0]?.plain_text || "",
 matricula:
-m.properties["Matricula Nacional"].rich_text[0]?.plain_text ||
-m.properties["Matricula Provincial"].rich_text[0]?.plain_text ||
+m.properties["Mat. MN"].rich_text[0]?.plain_text ||
+m.properties["Mat. MP"].rich_text[0]?.plain_text ||
 ""
 
 }))
