@@ -15,7 +15,7 @@ headers:{
 const data = await response.json()
 
 const vendedores =
-data.properties["AIC Lectura"]?.multi_select?.options?.map(o=>o.name) || []
+data.properties["AIC Lectura"]?.select?.options?.map(o=>o.name) || []
 
 const productos =
 data.properties["Productos"]?.multi_select?.options?.map(o=>o.name) || []
